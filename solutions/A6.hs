@@ -3,34 +3,50 @@ module A6 where
 import Provided
 
 import Data.List ( intersperse, sort )
+import GHC.Generics (S)
+import Data.Char (isAlpha)
 
 -- *** A6-0: WARM-UP *** --
 
 -- Q#01
+type Chances = Int 
+type Guess = String
+type Move = Char
+type Secret = String
+type Dictionary = [String]
 
-
+         
 -- Q#02
-data GameException
+data GameException = InvalidWord | InvalidMove | RepeatMove | GameOver
 
 -- Q#03
+lengthInRange:: Secret -> Bool
+lengthInRange s = let min = fst _LENGTH_  
+                      max = snd _LENGTH_ in 
+                      length s >=min && length s <= max
 
-lengthInRange = undefined
 
 -- Q#04
-
-invalidMove = undefined
+invalidMove:: Move -> Bool
+invalidMove = isAlpha
 
 -- Q#05
-
-revealLetters = undefined
+revealLetters:: Move -> Secret -> Guess -> Guess
+revealLetters m s g = zipWith (\s' g' -> if m == s' then s' else g') s g 
 
 -- Q#06
-
-updateChances = undefined
+updateChances:: Move -> Secret -> Chances -> Chances
+updateChances m s c = if found False s then c else c-1
+      where
+        found acc [] = acc
+        found acc (x:xs) = m == x || found False xs
 
 -- Q#07
-
-setSecret = undefined
+setSecret:: IO ()
+setSecret = do
+        putStr "Enter a secret word:\t"
+        
+        undefined
 
 
 -- *** A6-1: Records & Instances *** --
