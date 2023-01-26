@@ -42,21 +42,29 @@ updateChances m s c = if found False s then c else c-1
         found acc (x:xs) = m == x || found False xs
 
 -- Q#07
-setSecret:: IO ()
+setSecret:: IO String
 setSecret = do
         putStr "Enter a secret word:\t"
-        
-        undefined
+        showInput False
+        secret <- getLine
+        showInput True
+        _SPACE_
+        return secret
 
 
 -- *** A6-1: Records & Instances *** --
 
 -- Q#08
-data Game
+data Game = Game {
+                getSecret:: String,
+                getGuess:: String,
+                getMoves:: [Char],
+                getChances:: Int
+            }
 
 -- Q#09
-
-repeatedMove = undefined
+repeatedMove:: Move -> Game -> Bool
+repeatedMove m g = m `elem` getMoves g
 
 -- Q#10
 
