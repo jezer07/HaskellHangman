@@ -1,10 +1,11 @@
+{-# LANGUAGE InstanceSigs #-}
 module A6 where
 
 import Provided
 
 import Data.List ( intersperse, sort )
 import GHC.Generics (S)
-import Data.Char (isAlpha)
+import Data.Char (isAlpha, toUpper)
 
 -- *** A6-0: WARM-UP *** --
 
@@ -67,14 +68,27 @@ repeatedMove:: Move -> Game -> Bool
 repeatedMove m g = m `elem` getMoves g
 
 -- Q#10
-
-makeGame = undefined
+makeGame:: Secret -> Game
+makeGame secret = Game {
+                        getSecret = map toUpper secret,
+                        getGuess = replicate (length secret) '_',
+                        getMoves = [],
+                        getChances = _CHANCES_
+                }
 
 -- Q#11
-
-updateGame = undefined
+updateGame:: Move -> Game -> Game
+updateGame m g = let guess = revealLetters m (getSecret g) (getGuess g) 
+                  
+                 in g {
+                        getGuess = guess,
+                        getMoves = m: getMoves g,
+                        getChances = updateChances m (getSecret g) (getChances g)  
+                 }
 
 -- Q#12
+instance Show Game where
+        show g = showGameHelper (getSecret g) (getMoves g) (getChances g)
 
 showGameHelper :: String -> [Char] -> Int -> String
 showGameHelper game moves chances = unlines [
@@ -87,7 +101,16 @@ showGameHelper game moves chances = unlines [
 
 
 -- Q#13
-
+instance Show GameException where
+        show :: GameException -> String
+        show g = case g of 
+                 InvalidWord -> concat ["Invalid Word. The minimum allowed charcaters is ", lb, ", and maximum ",ub] 
+                 InvalidMove -> "Invalid Move"
+                 RepeatMove -> "Repeat Move"
+                 GameOver -> "Game Over"
+                 where 
+                   lb = show $ fst _LENGTH_
+                   ub = show $ snd _LENGTH_
 
 -- *** A6-2: Exception Contexts *** --
 
