@@ -5,7 +5,7 @@ import Provided
 
 import Data.List ( intersperse, sort )
 import GHC.Generics (S)
-import Data.Char (isAlpha, toUpper)
+import Data.Char (isAlpha, toUpper, toLower)
 
 -- *** A6-0: WARM-UP *** --
 
@@ -29,7 +29,7 @@ lengthInRange s = let min = fst _LENGTH_
 
 -- Q#04
 invalidMove:: Move -> Bool
-invalidMove = isAlpha
+invalidMove = not . isAlpha
 
 -- Q#05
 revealLetters:: Move -> Secret -> Guess -> Guess
@@ -104,7 +104,7 @@ showGameHelper game moves chances = unlines [
 instance Show GameException where
         show :: GameException -> String
         show g = case g of 
-                 InvalidWord -> concat ["Invalid Word. The minimum allowed charcaters is ", lb, ", and maximum ",ub] 
+                 InvalidWord -> concat ["Invalid Word. It should be all letters and the minimum allowed charcaters is ", lb, ", and maximum ",ub] 
                  InvalidMove -> "Invalid Move"
                  RepeatMove -> "Repeat Move"
                  GameOver -> "Game Over"
@@ -115,29 +115,39 @@ instance Show GameException where
 -- *** A6-2: Exception Contexts *** --
 
 -- Q#14
-
-toMaybe = undefined
+toMaybe:: Bool -> a -> Maybe a
+toMaybe b a = if b then Just a else Nothing
 
 -- Q#15
-
-validateSecret = undefined
+validateSecret:: (Secret -> Bool) -> GameException-> Secret -> Either GameException Secret 
+validateSecret f g s = if f s then Right s else Left g
 
 -- Q#16
+hasValidChars::  Secret -> Either GameException Secret 
+hasValidChars = validateSecret (foldr (\e acc -> isAlpha e && acc) True) InvalidWord
 
-hasValidChars = undefined
+isValidLength::  Secret -> Either GameException Secret 
+isValidLength = validateSecret lengthInRange InvalidWord
 
-
-isValidLength = undefined
-
-
-isInDict = undefined
+isInDict::  Dictionary -> Secret -> Either GameException Secret 
+isInDict dict = validateSecret (\xs -> map toLower xs `elem` dict) InvalidWord
 
 -- Q#17
+validateNoDict:: Secret -> Either GameException Secret 
+validateNoDict s = case hasValidChars s of
+                Right s -> isValidLength s
+                Left err -> Left err
 
-validateNoDict = undefined
-
-validateWithDict = undefined
+validateWithDict::  Dictionary -> Secret -> Either GameException Secret 
+validateWithDict d s = case validateNoDict s of
+                Right s -> isInDict d s
+                Left err -> Left err
 
 -- Q#18
-
-processTurn = undefined
+processTurn:: Move -> Game -> Either GameException Game
+processTurn m g 
+        | invalidMove m = Left InvalidMove
+        | repeatedMove m g = Left RepeatMove
+        | otherwise = updatedGame
+        where 
+           updatedGame = if getChances (updateGame m g) < 1 then Left GameOver else Right g
