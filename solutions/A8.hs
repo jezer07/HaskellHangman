@@ -78,8 +78,7 @@ processTurnS move  = do
   if isRepeated then return $ Left RepeatMove
   else do
     updateGameS move
-    game <- get
-    let chances = getChances game
+    chances <- gets getChances
     if chances < 1 then
       return $ Left GameOver
     else
