@@ -6,6 +6,7 @@ import A7
 
 import Control.Monad
 import Control.Monad.State
+import Data.Char (toUpper)
 
 -- *** A8: Monads *** --
 
@@ -53,14 +54,34 @@ runApp = do
 
 
 -- Q#05
+makeGameS:: Secret -> State Game ()
+makeGameS s = put $ Game {
+                  getSecret = map toUpper s,
+                  getGuess = replicate (length s) '_',
+                  getMoves = [],
+                  getChances = _CHANCES_
+                }
+updateGameS:: Move -> State Game () 
+updateGameS m = modify $ updateGame m
+    
 
-makeGameS = undefined
+repeatedMoveS:: Move -> State Game Bool
+repeatedMoveS m = do
+  currentGame <- get
+  let guessed = getMoves currentGame
+  return $ m `elem` guessed
 
-
-updateGameS = undefined
-
-
-repeatedMoveS = undefined
-
-
-processTurnS = undefined
+processTurnS:: Move -> State Game (Either GameException ())
+processTurnS move | invalidMove move = pure $ Left InvalidMove
+processTurnS move  = do
+  isRepeated <- repeatedMoveS move
+  if isRepeated then return $ Left RepeatMove
+  else do
+    updateGameS move
+    game <- get
+    let chances = getChances game
+    if chances < 1 then
+      return $ Left GameOver
+    else
+      return $ Right ()
+  
