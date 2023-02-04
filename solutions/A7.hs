@@ -9,8 +9,8 @@ import System.Directory ( doesFileExist )
 -- *** A7: Functors & Applicatives *** --
 
 -- Q#01
-getUpperChar:: IO String ->  IO String
-getUpperChar x = map toUpper <$> x
+getUpperChar:: IO Char
+getUpperChar = toUpper <$> getChar
 
 -- Q#02
 _DICT_ :: IO [String]

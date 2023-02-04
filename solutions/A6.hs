@@ -43,7 +43,7 @@ updateChances m s c = if found False s then c else c-1
         found acc (x:xs) = m == x || found False xs
 
 -- Q#07
-setSecret:: IO String
+setSecret:: IO Secret
 setSecret = do
         putStr "Enter a secret word:\t"
         showInput False
@@ -88,7 +88,7 @@ updateGame m g = let guess = revealLetters m (getSecret g) (getGuess g)
 
 -- Q#12
 instance Show Game where
-        show g = showGameHelper (getSecret g) (getMoves g) (getChances g)
+        show g = showGameHelper (getGuess g) (getMoves g) (getChances g)
 
 showGameHelper :: String -> [Char] -> Int -> String
 showGameHelper game moves chances = unlines [
@@ -150,4 +150,5 @@ processTurn m g
         | repeatedMove m g = Left RepeatMove
         | otherwise = updatedGame
         where 
-           updatedGame = if getChances (updateGame m g) < 1 then Left GameOver else Right g
+           newGame = updateGame m g
+           updatedGame = if getChances newGame < 1 then Left GameOver else Right newGame
